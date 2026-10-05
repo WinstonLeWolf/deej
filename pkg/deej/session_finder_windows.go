@@ -362,8 +362,12 @@ func (sf *wcaSessionFinder) processDevice(deviceIdx uint32, deviceCollection *wc
 
 	deviceInfo, err := sf.getDeviceInfo(deviceIdx, endpoint)
 	if err != nil {
-		sf.logger.Warnw("Failed to get device info", "deviceIdx", deviceIdx, "error", err)
-		return fmt.Errorf("get device %d info: %w", deviceIdx, err)
+		// Broken/ghost endpoints (common with HDMI/NVIDIA devices after sleep) used to
+		// fail the entire init and prevent the tray from ever appearing. Skip them.
+		sf.logger.Warnw("Skipping audio device that failed info lookup",
+			"deviceIdx", deviceIdx,
+			"error", err)
+		return nil
 	}
 
 	return sf.handleDevice(deviceIdx, deviceInfo, sessions)
