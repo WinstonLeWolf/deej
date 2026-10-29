@@ -215,7 +215,7 @@ func (sio *SerialIO) maintainConnection(ctx context.Context) {
 		forceImmediate := errors.Is(err, errResumeForced)
 		wait := backoff
 		if forceImmediate {
-			wait = 0
+			wait = 250 * time.Millisecond
 			backoff = reconnectMinBackoff
 		}
 
@@ -366,6 +366,7 @@ func (sio *SerialIO) closeConn() {
 	conn := sio.conn
 	sio.conn = nil
 	sio.connected = false
+	sio.lastKnownNumSliders = 0
 	sio.mu.Unlock()
 
 	if conn == nil {
